@@ -9,18 +9,18 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.AbstractRabbitConfiguration;
 
-
+@Configuration
+@Import(AbstractRabbitConfiguration.class)
 public class RabbitConfiguration extends AbstractRabbitConfiguration{
 
-	@Value("${stocks.quote.pattern}")
-	private String marketDataRoutingKey;
-	
 	@Override
 	protected void configureRabbitTemplate(RabbitTemplate rabbitTemplate) {
-		rabbitTemplate.setRoutingKey(direct_request_exchange);	
+		rabbitTemplate.setExchange(direct_request_exchange);	
 	}
 	
 	@Bean
@@ -32,20 +32,17 @@ public class RabbitConfiguration extends AbstractRabbitConfiguration{
 	 * Binds to the market data exchange. Interested in any stock quotes.
 	 */	
 	@Bean
-	public Binding marketDataBinding() {		
-		return BindingBuilder.bind(marketDataQueue()).to(marketDataExchange()).with(marketDataRoutingKey);
-	}
-
-	/**
-	 * This queue does not need a binding, since it relies on the default exchange.
-	 */	
-	@Bean
-	public Queue traderJoeQueue() {	
-		return new AnonymousQueue();
+	public Binding requestStockBinding() {		
+		return BindingBuilder.bind(directRequestStockQueue()).to(directRequestExchange()).with(routingkey_stock);
 	}
 	
 	@Bean
-	public AmqpAdmin rabbitAdmin() {
+	public Binding requestOptionBinding() {		
+		return BindingBuilder.bind(directRequestOptionQueue()).to(directRequestExchange()).with(routingkey_option);
+	}
+
+	@Bean
+	public AmqpAdmin rabbitClientAdmin() {
 		return new RabbitAdmin(connectionFactory());
 	}
 

@@ -20,11 +20,14 @@ import org.springframework.beans.factory.annotation.Value;
 @Configuration
 public abstract class AbstractRabbitConfiguration {
 	public static final String direct_marketdata_queue = "marketdata.rabbit.queue";
-	public static final String direct_request_queue = "request.rabbit.queue";
+	public static final String direct_request_stock_queue = "request.stock.rabbit.queue";
+	public static final String direct_request_option_queue = "request.option.rabbit.queue";
 	public static final String direct_request_exchange = "direct_request";
+	public static final String routingkey_stock = "request_stock";
+	public static final String routingkey_option = "request_option";
+	public static final String direct_marketdata_exchange = "direct_marketdata";
 	public static final String fanout_exchange = "fanout_all";
 	
-	@Value("${amqp.port:5672}") 
 	private int port = 5672;
 	protected abstract void configureRabbitTemplate(RabbitTemplate template);
 	
@@ -63,8 +66,13 @@ public abstract class AbstractRabbitConfiguration {
 	}
 	
 	@Bean 
-	public Queue directRequestQueue() {
-		return new Queue(direct_request_queue);
+	public Queue directRequestStockQueue() {
+		return new Queue(direct_request_stock_queue);
+	}
+	
+	@Bean 
+	public Queue directRequestOptionQueue() {
+		return new Queue(direct_request_option_queue);
 	}
 	
 	@Bean
