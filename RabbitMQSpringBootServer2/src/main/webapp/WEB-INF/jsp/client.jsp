@@ -10,7 +10,15 @@
 	<font color="red"> ${errorMessage}</font>
 	<div>Current Topic: ${topic }</div>
 	<form method="post">
-		Topic: <input type="text" name="topic"/>
+		Topic:   <select name="topic">
+						<option value="direct_request">request</option>
+						<option value="direct_marketdata">marketdata</option>
+  				</select><br/>
+		Routing Key:  <select name="route">
+						<option value="request_stock">stock</option>
+						<option value="request_option">option</option>
+  				</select><br/>
+		Number of Msg: <input type="number" step="1" name="numOfMsg"/><br/>
 		<input type="submit"/>
 	</form>
 </body>

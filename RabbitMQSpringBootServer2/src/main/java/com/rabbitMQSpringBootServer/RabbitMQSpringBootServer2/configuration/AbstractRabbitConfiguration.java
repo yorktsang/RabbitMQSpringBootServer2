@@ -9,6 +9,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -49,10 +50,19 @@ public abstract class AbstractRabbitConfiguration {
 		return template;
 	}
 	
-	
+	@Bean
+	public MessageProperties messageProperties() {
+		MessageProperties prop = new MessageProperties();
+		prop.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+		return prop;
+	}
+
 	@Bean
 	public AmqpTemplate amqpTemplate() {
-		return new RabbitTemplate(connectionFactory());
+		RabbitTemplate template = new RabbitTemplate(connectionFactory());
+		//template.setMessageConverter(jsonMessageConverter());
+		configureRabbitTemplate(template);
+		return template;
 	}
 	
 	@Bean

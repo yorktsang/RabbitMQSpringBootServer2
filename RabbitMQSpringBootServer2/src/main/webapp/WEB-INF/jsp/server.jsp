@@ -8,5 +8,6 @@
 </head>
 <body>
 <div>${currentTime }</div>
+<div>message: ${message }</div>
 </body>
 </html>
