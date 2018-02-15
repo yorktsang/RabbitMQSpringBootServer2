@@ -3,6 +3,7 @@ package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.controller;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.ReceiveAndReplyCallback;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,26 @@ public class ServerController {
 		model.put("message", message);
 		return "server";
 	}
+	@RequestMapping(value ="/server/retreive_reply", method = RequestMethod.GET)
+	public String retreiveAndReply(final ModelMap model) {
+		String currentTime = String.valueOf(serverBackground.getCounter());
+		//String message = (String) rabbitTemplate.receiveAndConvert(AbstractRabbitConfiguration.direct_request_stock_queue);
+		String replyRoute = "test";
+		//boolean received = rabbitTemplate.receiveAndReply(AbstractRabbitConfiguration.direct_request_stock_queue, new ReceiveAndReplyCallback<String,String>(){
+		boolean received = rabbitTemplate.receiveAndReply(AbstractRabbitConfiguration.direct_request_stock_queue, new ReceiveAndReplyCallback<String,String>(){ 
+			@Override
+			public String handle(String payload) {
+				log.info("retreiveAndReply():" + payload);
+				String currentTime2 = String.valueOf(serverBackground.getCounter());
+				return ("receive ok at " + currentTime2);
+			}}, "reply", "");
+		
+		model.put("currentTime", currentTime);
+		model.put("message", "receive ok at "+currentTime);
+		return "server";
+	}
+	
+
 	
 	@RabbitListener(queues="request.option.rabbit.queue", containerFactory="jsaFactory")
     public void recievedMessage(String company) {

@@ -2,6 +2,7 @@ package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
@@ -38,6 +39,12 @@ public class ClientController {
 	
 	@Autowired
 	private MessageProperties prop;
+	
+	private final CountDownLatch listenLatch = new CountDownLatch(1);
+
+	private final CountDownLatch confirmLatch = new CountDownLatch(1);
+
+	private final CountDownLatch returnLatch = new CountDownLatch(1);
 	
 	@RequestMapping (value = "/client", method = RequestMethod.GET)
 	public String index(final ModelMap model) {
@@ -79,6 +86,29 @@ public class ClientController {
 		}
 		model.put("errorMessage", errorMessage);
 		return "client";
+	}
+	
+	private void setupCallbacks() {
+		/*
+		 * Confirms/returns enabled in application.properties - add the callbacks here.
+		 */
+		((RabbitTemplate) rabbitTemplate).setConfirmCallback((correlation, ack, reason) -> {
+			if (correlation != null) {
+				System.out.println("Received " + (ack ? " ack " : " nack ") + "for correlation: " + correlation);
+			}
+			this.confirmLatch.countDown();
+		});
+		((RabbitTemplate) rabbitTemplate).setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
+			System.out.println("Returned: " + message + "\nreplyCode: " + replyCode
+					+ "\nreplyText: " + replyText + "\nexchange/rk: " + exchange + "/" + routingKey);
+			this.returnLatch.countDown();
+		});
+		/*
+		 * Replace the correlation data with one containing the converted message in case
+		 * we want to resend it after a nack.
+		 */
+		((RabbitTemplate) rabbitTemplate).setCorrelationDataPostProcessor((message, correlationData) ->
+				new CompleteMessageCorrelationData(correlationData != null ? correlationData.getId() : null, message));
 	}
 	
 	
