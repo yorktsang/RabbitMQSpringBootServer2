@@ -11,12 +11,13 @@
 	<div>Current Topic: ${topic }</div>
 	<form method="post">
 		Topic:   <select name="topic">
-						<option value="direct_request">request</option>
-						<option value="direct_marketdata">marketdata</option>
+						<option value="topicExchange_Quote">Quote</option>
+						<option value="topicExchange_Order">Order</option>
   				</select><br/>
 		Routing Key:  <select name="route">
-						<option value="request_stock">stock</option>
-						<option value="request_option">option</option>
+						<option value="stock">stock</option>
+						<option value="option">option</option>
+						<option value="cbbc">CBBC (not ready)</option>
   				</select><br/>
 		Number of Msg: <input type="number" step="1" name="numOfMsg"/><br/>
 		<input type="submit"/>

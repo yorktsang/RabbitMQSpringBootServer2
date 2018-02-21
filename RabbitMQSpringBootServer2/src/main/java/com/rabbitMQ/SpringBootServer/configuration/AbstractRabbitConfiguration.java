@@ -56,6 +56,52 @@ public abstract class AbstractRabbitConfiguration {
 	}
 	
 	@Bean
+	public Queue stockQuoteQueue() {
+		return new Queue("stock.quote.queue");
+	}
+	@Bean
+	public Queue stockOrderQueue() {
+		return new Queue("stock.order.queue");
+	}
+	@Bean
+	public Queue optionQuoteQueue() {
+		return new Queue("option.quote.queue");
+	}
+	@Bean
+	public Queue optionOrderQueue() {
+		return new Queue("option.order.queue");
+	}
+	
+	@Bean
+	public TopicExchange topicQuoteExchange() {
+		return new TopicExchange("topicExchange_Quote");
+	}
+	
+	@Bean
+	public Binding stockQuoteBinding() {
+		return BindingBuilder.bind(stockQuoteQueue()).to(topicQuoteExchange()).with("stock");
+	}
+	@Bean
+	public Binding optionQuoteBinding() {
+		return BindingBuilder.bind(optionOrderQueue()).to(topicQuoteExchange()).with("option");
+	}
+	
+	@Bean
+	public TopicExchange topicOrderExchange() {
+		return new TopicExchange("topicExchange_Order");
+	}
+	@Bean
+	public Binding stockOrderBinding() {
+		return BindingBuilder.bind(stockOrderQueue()).to(topicOrderExchange()).with("stock");
+	}
+	@Bean
+	public Binding optionOrderBinding() {
+		return BindingBuilder.bind(optionQuoteQueue()).to(topicOrderExchange()).with("option");
+	}
+
+	/*
+	 * 	
+	@Bean
 	public Queue simpleMessageListenerContainerQueue() {		
 		return new Queue("SimpleMessageListenerContainer.demo.rabbit.queue");	
 	}
@@ -64,10 +110,10 @@ public abstract class AbstractRabbitConfiguration {
 	public Queue rabbitListenerQueue() {		
 		return new Queue("RabbitListener.demo.rabbit.queue");	
 	}
-
+	
 	@Bean
 	public Queue directMarketdataQueue() {
-		return new Queue(direct_marketdata_queue);
+		return new Queue("marketdata.rabbit.queue");
 	}
 	
 	@Bean 
@@ -84,19 +130,5 @@ public abstract class AbstractRabbitConfiguration {
 	public FanoutExchange fanoutExchange() {
 		return new FanoutExchange(fanout_exchange);
 	}
-	
-	@Bean
-	public TopicExchange directRequestExchange() {
-		return new TopicExchange(direct_request_exchange);
-	}
-	
-	//@Bean
-	//public Binding directWebappBinding() {
-	//	return BindingBuilder.bind(directWebappQueue()).to(directWebappExchange()).with(direct_webapp_queue);
-	//}
-	
-	//@Bean
-	//public Binding fanoutBinding() {
-	//	return BindingBuilder.bind(directInvoiceQueue()).to(fanoutExchange());
-	//}
+	*/
 }

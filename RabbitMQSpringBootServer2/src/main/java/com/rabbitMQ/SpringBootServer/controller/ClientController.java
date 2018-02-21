@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
-import com.rabbitMQ.SpringBootServer.configuration.client.RabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.configuration.client.RabbitClientConfiguration;
 import com.rabbitMQ.SpringBootServer.controller.ClientNoCallbackController.CompleteMessageCorrelationData;
 
 
@@ -43,7 +43,7 @@ public class ClientController {
 	private static Logger log = Logger.getLogger(ClientController.class);
 	
 	@Autowired
-	private RabbitConfiguration rabbitConfiguration;
+	private RabbitClientConfiguration rabbitConfiguration;
 	
 	@Autowired
 	private RabbitTemplate rabbitTemplate;

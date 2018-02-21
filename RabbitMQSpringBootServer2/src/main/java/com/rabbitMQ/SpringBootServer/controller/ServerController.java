@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
-import com.rabbitMQ.SpringBootServer.configuration.client.RabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.configuration.client.RabbitClientConfiguration;
 import com.rabbitMQ.SpringBootServer.configuration.server.RabbitServerConfiguration;
 import com.rabbitMQ.SpringBootServer.service.ServerBackgroundService;
 

@@ -20,10 +20,9 @@ import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
 @Configuration
 @Import(AbstractRabbitConfiguration.class)
 @Scope("prototype")
-public class RabbitConfiguration extends AbstractRabbitConfiguration{
+public class RabbitClientConfiguration extends AbstractRabbitConfiguration{
 
 	@Bean 
-	@Primary
 	public RabbitTemplate rabbitTemplate() {
 		RabbitTemplate template = new RabbitTemplate(connectionFactory());
 		//template.setMessageConverter(jsonMessageConverter());
@@ -43,25 +42,12 @@ public class RabbitConfiguration extends AbstractRabbitConfiguration{
 	
 	@Override
 	protected void configureRabbitTemplate(RabbitTemplate rabbitTemplate) {
-		rabbitTemplate.setExchange(direct_request_exchange);	
+		//do nothing, default exchange depends on request type
 	}
 	
 	@Bean
 	public Queue marketDataQueue() {		
 		return new AnonymousQueue();
-	}
-	
-	/**
-	 * Binds to the market data exchange. Interested in any stock quotes.
-	 */	
-	@Bean
-	public Binding requestStockBinding() {		
-		return BindingBuilder.bind(directRequestStockQueue()).to(directRequestExchange()).with(routingkey_stock);
-	}
-	
-	@Bean
-	public Binding requestOptionBinding() {		
-		return BindingBuilder.bind(directRequestOptionQueue()).to(directRequestExchange()).with(routingkey_option);
 	}
 
 	@Bean

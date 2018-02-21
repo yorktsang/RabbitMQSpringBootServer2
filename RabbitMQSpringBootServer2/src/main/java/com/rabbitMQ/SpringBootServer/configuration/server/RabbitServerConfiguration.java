@@ -27,8 +27,7 @@ import com.rabbitmq.client.Channel;
 @Scope("prototype")
 public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
 
-	@Bean 
-	@Primary
+	@Bean
 	public RabbitTemplate rabbitTemplate() {
 		RabbitTemplate template = new RabbitTemplate(connectionFactory());
 		//template.setMessageConverter(jsonMessageConverter());
@@ -36,20 +35,10 @@ public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
 		return template;
 	}
 
-	/*
-	@Bean
-	@Primary
-	public AmqpTemplate amqpTemplate() {
-		RabbitTemplate template = new RabbitTemplate(connectionFactory());
-		//template.setMessageConverter(jsonMessageConverter());
-		configureRabbitTemplate(template);
-		return template;
-	}*/
-	
+
 	@Override
 	protected void configureRabbitTemplate(RabbitTemplate rabbitTemplate) {
-		rabbitTemplate.setMessageConverter(jsonMessageConverter());
-		rabbitTemplate.setExchange(direct_marketdata_exchange); 
+		//rabbitTemplate.setMessageConverter(jsonMessageConverter());
 	}
 	
 	@Bean
@@ -61,16 +50,6 @@ public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
 		return new SimpleMessageConverter();
 	}
 
-	@Bean
-	public Queue stockRequestQueue() {		
-		return new Queue(direct_request_stock_queue);	
-	}
-	
-	@Bean
-	public Queue optionRequestQueue() {		
-		return new Queue(direct_request_option_queue);	
-	}
-	
     @Bean
     public SimpleRabbitListenerContainerFactory jsaFactory(ConnectionFactory connectionFactory,
             SimpleRabbitListenerContainerFactoryConfigurer configurer) {
@@ -83,7 +62,7 @@ public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
     @Bean  
     public SimpleMessageListenerContainer messageContainer() {  
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());  
-        container.setQueues(simpleMessageListenerContainerQueue());  
+        container.setQueues(optionOrderQueue());  
         container.setExposeListenerChannel(true);  
         container.setMessageConverter(simpleMessageConverter());
         container.setMaxConcurrentConsumers(1);  
@@ -93,7 +72,7 @@ public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
             @Override  
             public void onMessage(Message message, Channel channel) throws Exception {  
                 byte[] body = message.getBody();  
-                System.out.println("SimpleMessageListenerContainer listening simpleMessageListenerContainerQueue: " + new String(body));  
+                System.out.println("SimpleMessageListenerContainer listening optionOrderQueue: " + new String(body));  
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); //确认消息成功消费  
             }
         });  
