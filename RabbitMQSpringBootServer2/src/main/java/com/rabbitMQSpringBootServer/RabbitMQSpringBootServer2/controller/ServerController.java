@@ -22,7 +22,7 @@ public class ServerController {
 	
 	private static Logger log = Logger.getLogger(ServerController.class);
 	
-	
+
 	@Autowired
 	ServerBackgroundService serverBackground;
 	
@@ -68,9 +68,9 @@ public class ServerController {
 	}
 	
 
-	
-	@RabbitListener(queues="request.option.rabbit.queue", containerFactory="jsaFactory")
+	@RabbitListener(queues="RabbitListener.demo.rabbit.queue", containerFactory="jsaFactory")
     public void recievedMessage(String company) {
-        log.info("Recieved Message: " + company);
+
+        log.info("Reveiced Message for @RabbitListener(RabbitListener.demo.rabbit.queue):" + company);
     }
 }

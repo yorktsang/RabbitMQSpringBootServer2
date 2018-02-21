@@ -19,10 +19,6 @@
 						<option value="request_option">option</option>
   				</select><br/>
 		Number of Msg: <input type="number" step="1" name="numOfMsg"/><br/>
-		Request Callback:  <select name="callback">
-						<option value="callback_yes">yes</option>
-						<option value="callback_no">no</option>
-  				</select><br/>
 		<input type="submit"/>
 	</form>
 </body>

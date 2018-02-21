@@ -1,6 +1,7 @@
 package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.client;
 
 import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -11,13 +12,35 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 
 import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.AbstractRabbitConfiguration;
 
 @Configuration
 @Import(AbstractRabbitConfiguration.class)
+@Scope("prototype")
 public class RabbitConfiguration extends AbstractRabbitConfiguration{
 
+	@Bean 
+	@Primary
+	public RabbitTemplate rabbitTemplate() {
+		RabbitTemplate template = new RabbitTemplate(connectionFactory());
+		//template.setMessageConverter(jsonMessageConverter());
+		configureRabbitTemplate(template);
+		return template;
+	}
+
+	/*
+	@Bean
+	@Primary
+	public AmqpTemplate amqpTemplate() {
+		RabbitTemplate template = new RabbitTemplate(connectionFactory());
+		//template.setMessageConverter(jsonMessageConverter());
+		configureRabbitTemplate(template);
+		return template;
+	}*/
+	
 	@Override
 	protected void configureRabbitTemplate(RabbitTemplate rabbitTemplate) {
 		rabbitTemplate.setExchange(direct_request_exchange);	

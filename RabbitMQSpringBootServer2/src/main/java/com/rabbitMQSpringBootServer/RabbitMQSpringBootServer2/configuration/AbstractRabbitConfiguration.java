@@ -38,18 +38,11 @@ public abstract class AbstractRabbitConfiguration {
 		temp.setUsername("test");
 		temp.setPassword("test");
 		temp.setConnectionLimit(20);
+		temp.setPublisherConfirms(true); // this must be set for publisher confirmation
 		return temp;
 	}
 	
 
-	@Bean 
-	public RabbitTemplate rabbitTemplate() {
-		RabbitTemplate template = new RabbitTemplate(connectionFactory());
-		//template.setMessageConverter(jsonMessageConverter());
-		configureRabbitTemplate(template);
-		return template;
-	}
-	
 	@Bean
 	public MessageProperties messageProperties() {
 		MessageProperties prop = new MessageProperties();
@@ -58,16 +51,18 @@ public abstract class AbstractRabbitConfiguration {
 	}
 
 	@Bean
-	public AmqpTemplate amqpTemplate() {
-		RabbitTemplate template = new RabbitTemplate(connectionFactory());
-		//template.setMessageConverter(jsonMessageConverter());
-		configureRabbitTemplate(template);
-		return template;
+	public AmqpAdmin amqpAdmin() {
+		return new RabbitAdmin(connectionFactory());
 	}
 	
 	@Bean
-	public AmqpAdmin amqpAdmin() {
-		return new RabbitAdmin(connectionFactory());
+	public Queue simpleMessageListenerContainerQueue() {		
+		return new Queue("SimpleMessageListenerContainer.demo.rabbit.queue");	
+	}
+	
+	@Bean
+	public Queue rabbitListenerQueue() {		
+		return new Queue("RabbitListener.demo.rabbit.queue");	
 	}
 
 	@Bean

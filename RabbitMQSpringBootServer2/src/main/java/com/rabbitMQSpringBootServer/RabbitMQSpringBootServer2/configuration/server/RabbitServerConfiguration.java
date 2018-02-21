@@ -1,9 +1,14 @@
 package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.server;
 
+import org.springframework.amqp.core.AcknowledgeMode;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
@@ -11,13 +16,36 @@ import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainer
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 
 import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.AbstractRabbitConfiguration;
+import com.rabbitmq.client.Channel;
 
 @Configuration
 @Import(AbstractRabbitConfiguration.class)
+@Scope("prototype")
 public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
 
+	@Bean 
+	@Primary
+	public RabbitTemplate rabbitTemplate() {
+		RabbitTemplate template = new RabbitTemplate(connectionFactory());
+		//template.setMessageConverter(jsonMessageConverter());
+		configureRabbitTemplate(template);
+		return template;
+	}
+
+	/*
+	@Bean
+	@Primary
+	public AmqpTemplate amqpTemplate() {
+		RabbitTemplate template = new RabbitTemplate(connectionFactory());
+		//template.setMessageConverter(jsonMessageConverter());
+		configureRabbitTemplate(template);
+		return template;
+	}*/
+	
 	@Override
 	protected void configureRabbitTemplate(RabbitTemplate rabbitTemplate) {
 		rabbitTemplate.setMessageConverter(jsonMessageConverter());
@@ -51,4 +79,25 @@ public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
         factory.setMessageConverter(simpleMessageConverter());
         return factory;
     }
+    
+    @Bean  
+    public SimpleMessageListenerContainer messageContainer() {  
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());  
+        container.setQueues(simpleMessageListenerContainerQueue());  
+        container.setExposeListenerChannel(true);  
+        container.setMessageConverter(simpleMessageConverter());
+        container.setMaxConcurrentConsumers(1);  
+        container.setConcurrentConsumers(1);  
+        container.setAcknowledgeMode(AcknowledgeMode.MANUAL); //设置确认模式手工确认  
+        container.setMessageListener(new ChannelAwareMessageListener() {  
+            @Override  
+            public void onMessage(Message message, Channel channel) throws Exception {  
+                byte[] body = message.getBody();  
+                System.out.println("SimpleMessageListenerContainer listening simpleMessageListenerContainerQueue: " + new String(body));  
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); //确认消息成功消费  
+            }
+        });  
+        return container;  
+    }  
+    
 }
