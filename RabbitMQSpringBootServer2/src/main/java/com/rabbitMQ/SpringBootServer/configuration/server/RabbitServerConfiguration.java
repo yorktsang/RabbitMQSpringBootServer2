@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.server;
+package com.rabbitMQ.SpringBootServer.configuration.server;
 
 import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.AbstractRabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
 import com.rabbitmq.client.Channel;
 
 @Configuration

@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.controller;
+package com.rabbitMQ.SpringBootServer.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.AbstractRabbitConfiguration;
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.client.RabbitConfiguration;
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.controller.ClientNoCallbackController.CompleteMessageCorrelationData;
+import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.configuration.client.RabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.controller.ClientNoCallbackController.CompleteMessageCorrelationData;
 
 
 @Controller

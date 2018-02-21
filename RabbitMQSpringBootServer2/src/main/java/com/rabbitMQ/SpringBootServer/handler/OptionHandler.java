@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.handler;
+package com.rabbitMQ.SpringBootServer.handler;
 
 import org.apache.log4j.Logger;
 

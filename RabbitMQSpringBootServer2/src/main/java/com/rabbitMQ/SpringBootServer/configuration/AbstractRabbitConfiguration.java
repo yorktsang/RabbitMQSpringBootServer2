@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration;
+package com.rabbitMQ.SpringBootServer.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

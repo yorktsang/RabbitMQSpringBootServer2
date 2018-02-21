@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.client;
+package com.rabbitMQ.SpringBootServer.configuration.client;
 
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.AbstractRabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
 
 @Configuration
 @Import(AbstractRabbitConfiguration.class)

@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.service;
+package com.rabbitMQ.SpringBootServer.service;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

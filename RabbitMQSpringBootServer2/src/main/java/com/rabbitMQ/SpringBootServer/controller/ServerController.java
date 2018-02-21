@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.controller;
+package com.rabbitMQ.SpringBootServer.controller;
 
 import org.apache.log4j.Logger;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -12,10 +12,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.AbstractRabbitConfiguration;
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.client.RabbitConfiguration;
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.configuration.server.RabbitServerConfiguration;
-import com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2.service.ServerBackgroundService;
+import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.configuration.client.RabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.configuration.server.RabbitServerConfiguration;
+import com.rabbitMQ.SpringBootServer.service.ServerBackgroundService;
 
 @Controller
 public class ServerController {

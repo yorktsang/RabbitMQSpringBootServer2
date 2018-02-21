@@ -1,4 +1,4 @@
-package com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2;
+package com.rabbitMQ.SpringBootServer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
-@ComponentScan("com.rabbitMQSpringBootServer.RabbitMQSpringBootServer2")
+@ComponentScan("com.rabbitMQ.SpringBootServer")
 public class App 
 {
 
