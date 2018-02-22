@@ -4,7 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -42,6 +44,8 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
 import com.rabbitMQ.SpringBootServer.configuration.client.RabbitClientConfiguration;
 import com.rabbitMQ.SpringBootServer.controller.ClientNoCallbackController.CompleteMessageCorrelationData;
+import com.rabbitMQ.SpringBootServer.domain.OrderRequest;
+import com.rabbitMQ.SpringBootServer.domain.OrderResponse;
 
 
 @Controller
@@ -75,7 +79,7 @@ public class ClientController implements RabbitTemplate.ConfirmCallback, ReturnC
 	
 	@RequestMapping (value = "/client", method = RequestMethod.GET)
 	public String index(final ModelMap model) {
-		test();
+		//test();
 		return "client";
 	}
 	
@@ -94,40 +98,41 @@ public class ClientController implements RabbitTemplate.ConfirmCallback, ReturnC
 		
 		for(int i = 0; i < count; i++) {
 			String correlationId = UUID.randomUUID().toString();
-			String sendMsg = getCurrentLocalDateTimeStamp();
+			Object message = null;
+			if("topicExchange_Order".equalsIgnoreCase(topic) && "option".equalsIgnoreCase(route)) {
+				OrderRequest orderRequest = createOptionOrderRequest();
+				message = orderRequest;
+			}else {
+				String sendMsg = getCurrentLocalDateTimeStamp();
+				message = sendMsg;
+			}
+			
 			MessageProperties newProp = new MessageProperties();
-			newProp.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-			Message amqpMessage = new SimpleMessageConverter().toMessage(sendMsg, newProp);
+			Message amqpMessage = new SimpleMessageConverter().toMessage(message, newProp);
+			Object receive = null;
 			try {
 				if(topic.isEmpty()) {
 					if(route.isEmpty()) {
-						String receive = "";
-						receive =(String)rabbitTemplate.convertSendAndReceive(route, amqpMessage, new CorrelationData(correlationId));
-						//rabbitTemplate.convertAndSend(route, amqpMessage, new CorrelationData(correlationId));
+						receive = rabbitTemplate.convertSendAndReceive(route, amqpMessage, new CorrelationData(correlationId));
 						log.info("rabbitTemplate sent message with correlationId:" +route + ">>"+ correlationId);
-						//rabbitTemplate.convertAndSend(route,amqpMessage);
 					}
 				}else {
 					if(route.isEmpty()) {
 						//not feasible
 					}else {
-						String receive = "";
-						receive = (String)rabbitTemplate.convertSendAndReceive(topic, route, amqpMessage, new CorrelationData(correlationId));
-						//rabbitTemplate.convertAndSend(topic,route,amqpMessage, new CorrelationData(correlationId));
+						receive = rabbitTemplate.convertSendAndReceive(topic, route, amqpMessage, new CorrelationData(correlationId));
 						log.info("rabbitTemplate sent message with correlationId:" +topic+"|"+route + ">>"+ correlationId);
-						log.info("receive ="+receive);
 					}
 				}
 			}catch(Exception e) {
-				errorMessage += "Failed to send Msg: "+ sendMsg +"<br/>"+e.getMessage()+"<br/>";
+				errorMessage += "Failed to send Msg <br/>"+e.getMessage()+"<br/>";
 			}
 			
-			//if (this.confirmLatch.await(10, TimeUnit.SECONDS)) {
-			//	log.info("Confirm received");
-			//}
-			//else {
-			//	log.info("Confirm NOT received");
-			//}
+			if (receive instanceof OrderResponse) {
+				log.info(((OrderResponse)receive).toString());
+			}else if(receive instanceof String) {
+				log.info((String)receive);
+			}
 
 		}
 		model.put("errorMessage", errorMessage);
@@ -170,24 +175,6 @@ public class ClientController implements RabbitTemplate.ConfirmCallback, ReturnC
 		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss.SSS"));
 	}
 	
-	static class CompleteMessageCorrelationData extends CorrelationData {
-
-		private final Message message;
-		CompleteMessageCorrelationData(String id, Message message) {
-			super(id);
-			this.message = message;
-		}
-		public Message getMessage() {
-			return this.message;
-		}
-
-		@Override
-		public String toString() {
-			return "CompleteMessageCorrelationData [id=" + getId() + ", message=" + this.message + "]";
-		}
-
-	}
-
 	@Override
 	public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
 		log.info("Returned: " + message + "\nreplyCode: " + replyCode
@@ -198,6 +185,21 @@ public class ClientController implements RabbitTemplate.ConfirmCallback, ReturnC
 	@Override
 	public void confirm(CorrelationData correlationData, boolean ack, String cause) {
 		log.info("setConfirmCallback received " + (ack ? " ack " : " nack ") + "for correlation: " + correlationData);
+	}
+	
+	public OrderRequest createOptionOrderRequest() {
+		Random  randomGenerator = new Random();
+		List<String> optionList = Arrays.asList("12345 hk","12346 hk", "12347 hk", "12348 hk");
+		
+		OrderRequest or = new OrderRequest();
+		or.setTicker(optionList.get(randomGenerator.nextInt(optionList.size())));
+		or.setQuantity(randomGenerator.nextInt(10)*100);
+		or.setPrice(randomGenerator.nextDouble());
+		or.setOrderType("Normal");
+		or.setBuyRequest(randomGenerator.nextInt(2) == 0 ? true: false);
+		or.setUserName("york");
+		or.setDateTime(getCurrentLocalDateTimeStamp());
+		return or;
 	}
 	
 	public void test() {

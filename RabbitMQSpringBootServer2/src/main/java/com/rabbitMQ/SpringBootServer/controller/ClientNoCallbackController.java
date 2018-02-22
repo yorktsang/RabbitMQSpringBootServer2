@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
 import com.rabbitMQ.SpringBootServer.configuration.client.RabbitClientConfiguration;
-import com.rabbitMQ.SpringBootServer.controller.ClientController.CompleteMessageCorrelationData;
 
 @Controller
 @Scope("session")
