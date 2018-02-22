@@ -8,6 +8,7 @@ import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
@@ -35,10 +36,11 @@ public abstract class AbstractRabbitConfiguration {
 	@Bean
 	public ConnectionFactory connectionFactory() {
 		CachingConnectionFactory temp = new CachingConnectionFactory("localhost");
-		temp.setUsername("test");
-		temp.setPassword("test");
+		temp.setUsername("guest");
+		temp.setPassword("guest");
 		temp.setConnectionLimit(20);
 		temp.setPublisherConfirms(true); // this must be set for publisher confirmation
+		temp.setPublisherReturns(true);
 		return temp;
 	}
 	
@@ -53,6 +55,22 @@ public abstract class AbstractRabbitConfiguration {
 	@Bean
 	public AmqpAdmin amqpAdmin() {
 		return new RabbitAdmin(connectionFactory());
+	}
+	@Bean
+	public Queue testQueue() {
+		return new Queue("request.test.queue");
+	}
+	@Bean
+	public Queue testReplyQueue() {
+		return new Queue("reply.test.queue");
+	}
+	@Bean
+	public DirectExchange testExchange() {
+		return new DirectExchange("directExchange_test");
+	}
+	@Bean
+	public Binding testBinding() {
+		return BindingBuilder.bind(testQueue()).to(testExchange()).with("test");
 	}
 	
 	@Bean
@@ -83,7 +101,7 @@ public abstract class AbstractRabbitConfiguration {
 	}
 	@Bean
 	public Binding optionQuoteBinding() {
-		return BindingBuilder.bind(optionOrderQueue()).to(topicQuoteExchange()).with("option");
+		return BindingBuilder.bind(optionQuoteQueue()).to(topicQuoteExchange()).with("option");
 	}
 	
 	@Bean
@@ -96,7 +114,7 @@ public abstract class AbstractRabbitConfiguration {
 	}
 	@Bean
 	public Binding optionOrderBinding() {
-		return BindingBuilder.bind(optionQuoteQueue()).to(topicOrderExchange()).with("option");
+		return BindingBuilder.bind(optionOrderQueue()).to(topicOrderExchange()).with("option");
 	}
 
 	/*

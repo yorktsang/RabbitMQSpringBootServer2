@@ -40,14 +40,6 @@ public class ClientNoCallbackController {
 	@Autowired
 	private MessageProperties prop;
 	
-	private boolean callbackConfig = false;
-	
-	private final CountDownLatch listenLatch = new CountDownLatch(1);
-
-	private final CountDownLatch confirmLatch = new CountDownLatch(1);
-
-	private final CountDownLatch returnLatch = new CountDownLatch(1);
-	
 	@RequestMapping (value = "/client_nocallback", method = RequestMethod.GET)
 	public String index(final ModelMap model) {
 		return "client";

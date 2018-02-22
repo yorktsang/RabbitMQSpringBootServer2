@@ -42,7 +42,7 @@ public class ServerController {
 	@RequestMapping(value ="/server/retreive", method = RequestMethod.GET)
 	public String retreive(final ModelMap model) {
 		String currentTime = String.valueOf(serverBackground.getCounter());
-		String message = (String) rabbitTemplate.receiveAndConvert(AbstractRabbitConfiguration.direct_request_stock_queue);
+		String message = (String) rabbitTemplate.receiveAndConvert("stock.order.queue");
 		
 		model.put("currentTime", currentTime);
 		model.put("message", message);
@@ -54,7 +54,7 @@ public class ServerController {
 		//String message = (String) rabbitTemplate.receiveAndConvert(AbstractRabbitConfiguration.direct_request_stock_queue);
 		String replyRoute = "test";
 		//boolean received = rabbitTemplate.receiveAndReply(AbstractRabbitConfiguration.direct_request_stock_queue, new ReceiveAndReplyCallback<String,String>(){
-		boolean received = rabbitTemplate.receiveAndReply(AbstractRabbitConfiguration.direct_request_stock_queue, new ReceiveAndReplyCallback<String,String>(){ 
+		boolean received = rabbitTemplate.receiveAndReply("stock.quote.queue", new ReceiveAndReplyCallback<String,String>(){ 
 			@Override
 			public String handle(String payload) {
 				log.info("retreiveAndReply():" + payload);
@@ -68,9 +68,10 @@ public class ServerController {
 	}
 	
 
-	@RabbitListener(queues="RabbitListener.demo.rabbit.queue", containerFactory="jsaFactory")
-    public void recievedMessage(String company) {
+	@RabbitListener(queues="stock.order.queue", containerFactory="jsaFactory")
+    public String recievedMessage(String company) {
 
-        log.info("Reveiced Message for @RabbitListener(RabbitListener.demo.rabbit.queue):" + company);
+        log.info("Reveiced Message for @RabbitListener(stock.order.queue):" + company);
+        return "haha";
     }
 }

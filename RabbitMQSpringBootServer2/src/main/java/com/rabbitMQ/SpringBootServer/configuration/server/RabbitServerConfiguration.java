@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 
 import com.rabbitMQ.SpringBootServer.configuration.AbstractRabbitConfiguration;
+import com.rabbitMQ.SpringBootServer.handler.OptionHandler;
 import com.rabbitmq.client.Channel;
 
 @Configuration
@@ -61,22 +63,27 @@ public class RabbitServerConfiguration extends AbstractRabbitConfiguration{
     
     @Bean  
     public SimpleMessageListenerContainer messageContainer() {  
+    	//this bean will start listening the queue after springbootapplication starts
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());  
         container.setQueues(optionOrderQueue());  
         container.setExposeListenerChannel(true);  
         container.setMessageConverter(simpleMessageConverter());
         container.setMaxConcurrentConsumers(1);  
         container.setConcurrentConsumers(1);  
-        container.setAcknowledgeMode(AcknowledgeMode.MANUAL); //设置确认模式手工确认  
-        container.setMessageListener(new ChannelAwareMessageListener() {  
+        container.setAcknowledgeMode(AcknowledgeMode.AUTO); //设置确认模式手工确认  
+        container.setMessageListener(new MessageListenerAdapter(new OptionHandler()));  
+        return container;  
+    }  
+    
+    /*
+     * new ChannelAwareMessageListener() {  
             @Override  
             public void onMessage(Message message, Channel channel) throws Exception {  
                 byte[] body = message.getBody();  
                 System.out.println("SimpleMessageListenerContainer listening optionOrderQueue: " + new String(body));  
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); //确认消息成功消费  
             }
-        });  
-        return container;  
-    }  
+        }
+     */
     
 }

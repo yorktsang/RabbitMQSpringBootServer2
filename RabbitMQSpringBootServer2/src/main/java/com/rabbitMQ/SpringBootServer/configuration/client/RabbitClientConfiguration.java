@@ -43,10 +43,11 @@ public class RabbitClientConfiguration extends AbstractRabbitConfiguration{
 	@Override
 	protected void configureRabbitTemplate(RabbitTemplate rabbitTemplate) {
 		//do nothing, default exchange depends on request type
+		rabbitTemplate.setExchange("topicExchange_Quote");
 	}
 	
 	@Bean
-	public Queue marketDataQueue() {		
+	public Queue replyQueue() {		
 		return new AnonymousQueue();
 	}
 

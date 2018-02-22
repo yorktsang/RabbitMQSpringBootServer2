@@ -6,7 +6,8 @@ public class OptionHandler {
 
 	private static Logger log = Logger.getLogger(OptionHandler.class);
 	
-	public void handleMessage(String optionRequest) {
+	public String handleMessage(String optionRequest) {
 		log.info("Received Option Request:"+ optionRequest);
+		return "Option Ordered";
 	}
 }

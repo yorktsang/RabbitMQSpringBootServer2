@@ -1,14 +1,21 @@
 package com.rabbitMQ.SpringBootServer.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
@@ -19,6 +26,7 @@ import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate.ReturnCallback;
 import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +46,7 @@ import com.rabbitMQ.SpringBootServer.controller.ClientNoCallbackController.Compl
 
 @Controller
 @Scope("session")
-public class ClientController {
+public class ClientController implements RabbitTemplate.ConfirmCallback, ReturnCallback{
 	
 	private static Logger log = Logger.getLogger(ClientController.class);
 	
@@ -51,16 +59,23 @@ public class ClientController {
 	@Autowired
 	private MessageProperties prop;
 	
-	private boolean callbackConfig = false;
+	private boolean callbackConfig = true;
 	
-	private final CountDownLatch listenLatch = new CountDownLatch(1);
+	//private final CountDownLatch listenLatch = new CountDownLatch(1);
 
-	private final CountDownLatch confirmLatch = new CountDownLatch(1);
+	//private final CountDownLatch confirmLatch = new CountDownLatch(1);
 
-	private final CountDownLatch returnLatch = new CountDownLatch(1);
+	//private final CountDownLatch returnLatch = new CountDownLatch(1);
+	
+	@PostConstruct
+	public void init() {
+		rabbitTemplate.setConfirmCallback(this);
+		rabbitTemplate.setReturnCallback(this);
+	}
 	
 	@RequestMapping (value = "/client", method = RequestMethod.GET)
 	public String index(final ModelMap model) {
+		test();
 		return "client";
 	}
 	
@@ -68,7 +83,6 @@ public class ClientController {
 	public String client(final ModelMap model, @RequestParam final String topic
 			, @RequestParam final String route
 			, @RequestParam final String numOfMsg) throws InterruptedException {
-		setupCallbacks();
 		int count = 1;
 		String errorMessage ="";
 
@@ -81,15 +95,16 @@ public class ClientController {
 		for(int i = 0; i < count; i++) {
 			String correlationId = UUID.randomUUID().toString();
 			String sendMsg = getCurrentLocalDateTimeStamp();
-			Message amqpMessage = new SimpleMessageConverter().toMessage(sendMsg, prop);
+			MessageProperties newProp = new MessageProperties();
+			newProp.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+			Message amqpMessage = new SimpleMessageConverter().toMessage(sendMsg, newProp);
 			try {
 				if(topic.isEmpty()) {
 					if(route.isEmpty()) {
 						String receive = "";
-						//receive =(String)rabbitTemplate.convertSendAndReceive(route, amqpMessage, new CorrelationData(correlationId));
-						rabbitTemplate.convertAndSend(route, amqpMessage, new CorrelationData(correlationId));
-						log.info("rabbitTemplate sent message with correlationId:" + correlationId);
-						log.info(receive);
+						receive =(String)rabbitTemplate.convertSendAndReceive(route, amqpMessage, new CorrelationData(correlationId));
+						//rabbitTemplate.convertAndSend(route, amqpMessage, new CorrelationData(correlationId));
+						log.info("rabbitTemplate sent message with correlationId:" +route + ">>"+ correlationId);
 						//rabbitTemplate.convertAndSend(route,amqpMessage);
 					}
 				}else {
@@ -97,22 +112,22 @@ public class ClientController {
 						//not feasible
 					}else {
 						String receive = "";
-						//receive = (String)rabbitTemplate.convertSendAndReceive(route, amqpMessage, new CorrelationData(correlationId));
-						rabbitTemplate.convertAndSend(topic,route,amqpMessage, new CorrelationData(correlationId));
-						log.info("rabbitTemplate sent message with correlationId:" + correlationId);
-						log.info(receive);
+						receive = (String)rabbitTemplate.convertSendAndReceive(topic, route, amqpMessage, new CorrelationData(correlationId));
+						//rabbitTemplate.convertAndSend(topic,route,amqpMessage, new CorrelationData(correlationId));
+						log.info("rabbitTemplate sent message with correlationId:" +topic+"|"+route + ">>"+ correlationId);
+						log.info("receive ="+receive);
 					}
 				}
 			}catch(Exception e) {
-				errorMessage += "Failed to send Msg: "+ sendMsg +"<br/>";
+				errorMessage += "Failed to send Msg: "+ sendMsg +"<br/>"+e.getMessage()+"<br/>";
 			}
 			
-			if (this.confirmLatch.await(10, TimeUnit.SECONDS)) {
-				log.info("Confirm received");
-			}
-			else {
-				log.info("Confirm NOT received");
-			}
+			//if (this.confirmLatch.await(10, TimeUnit.SECONDS)) {
+			//	log.info("Confirm received");
+			//}
+			//else {
+			//	log.info("Confirm NOT received");
+			//}
 
 		}
 		model.put("errorMessage", errorMessage);
@@ -132,12 +147,12 @@ public class ClientController {
 				if (correlation != null) {
 					log.info("setConfirmCallback received " + (ack ? " ack " : " nack ") + "for correlation: " + correlation);
 				}
-				this.confirmLatch.countDown();
+				//this.confirmLatch.countDown();
 			});
 			rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
-				log.info("Returned: " + message + "\nreplyCode: " + replyCode
+				log.info("setReturnCallback Returned: " + message + "\nreplyCode: " + replyCode
 						+ "\nreplyText: " + replyText + "\nexchange/rk: " + exchange + "/" + routingKey);
-				this.returnLatch.countDown();
+				//this.returnLatch.countDown();
 			});
 			/*
 			 * Replace the correlation data with one containing the converted message in case
@@ -170,6 +185,62 @@ public class ClientController {
 		public String toString() {
 			return "CompleteMessageCorrelationData [id=" + getId() + ", message=" + this.message + "]";
 		}
+
+	}
+
+	@Override
+	public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
+		log.info("Returned: " + message + "\nreplyCode: " + replyCode
+				+ "\nreplyText: " + replyText + "\nexchange/rk: " + exchange + "/" + routingKey);
+		
+	}
+
+	@Override
+	public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+		log.info("setConfirmCallback received " + (ack ? " ack " : " nack ") + "for correlation: " + correlationData);
+	}
+	
+	public void test() {
+		  final RabbitTemplate template = new RabbitTemplate(rabbitConfiguration.connectionFactory()); 
+		  template.setExchange(rabbitConfiguration.testExchange().getName());
+		  template.setRoutingKey("test"); 
+		  template.setReplyTimeout(2000);
+
+		  
+		  final RabbitTemplate replyTemplate = new RabbitTemplate(rabbitConfiguration.connectionFactory()); 
+		  replyTemplate.setQueue(rabbitConfiguration.testQueue().getName()); 
+		  ExecutorService executor = Executors.newFixedThreadPool(1); 
+		  // Set up a consumer to respond to our producer 
+		  Future<String> received = executor.submit(new Callable<String>() { 
+		 
+		   public String call() throws Exception { 
+		    Message message = null; 
+		    for (int i = 0; i < 10; i++) { 
+		     message = replyTemplate.receive(); 
+			  
+		     if (message != null) { 
+		    	 log.error("!!!message received.");
+		      break; 
+		     } 
+		     Thread.sleep(100L); 
+		    } 
+		    log.error("ReplyToAddr:"+message.getMessageProperties().getReplyTo());
+
+		    replyTemplate.send(message.getMessageProperties().getReplyTo(), message); 
+		    return (String) replyTemplate.getMessageConverter().fromMessage(message); 
+		   } 
+		 
+		  }); 
+		  
+		  log.error("about to send message");
+		  String result = (String) template.convertSendAndReceive("message"); 
+		  try {
+			log.error("Future:"+received.get());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		  log.error("result:" +result);
 
 	}
 }
